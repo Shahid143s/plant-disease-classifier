@@ -1,37 +1,47 @@
 import os
 import json
 from PIL import Image
-
+import pandas as pd
 import numpy as np
 import tensorflow as tf
 import streamlit as st
 
 
+
+st.markdown("""
+    <style>
+        .subheader-box {
+            background-color: #F5F5F5;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            width: 80%;
+            text-align: center;
+        }
+        .subheader-text {
+            font-size: 1.2em;
+            color: #31333F;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Load the pre-trained model and class names
 working_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = f"{working_dir}/trained_model/plant_disease_prediction_model.h5"
-# Load the pre-trained model
 model = tf.keras.models.load_model(model_path)
-
-# loading the class names
 class_indices = json.load(open(f"{working_dir}/modified_class_indices.json"))
 
-
-# Function to Load and Preprocess the Image using Pillow
+# Function to load and preprocess the image
 def load_and_preprocess_image(image_path, target_size=(224, 224)):
-    # Load the image
     img = Image.open(image_path)
-    # Resize the image
     img = img.resize(target_size)
-    # Convert the image to a numpy array
     img_array = np.array(img)
-    # Add batch dimension
     img_array = np.expand_dims(img_array, axis=0)
-    # Scale the image values to [0, 1]
     img_array = img_array.astype('float32') / 255.
     return img_array
 
-
-# Function to Predict the Class of an Image
+# Function to predict the class of an image
 def predict_image_class(model, image_path, class_indices):
     preprocessed_img = load_and_preprocess_image(image_path)
     predictions = model.predict(preprocessed_img)
@@ -40,26 +50,166 @@ def predict_image_class(model, image_path, class_indices):
     return predicted_class_name
 
 
-# Streamlit App
-st.title('Plant Disease Classification')
 
-uploaded_image = st.file_uploader("Upload image of plant leaf (jpg/jpeg/png):", type=["jpg", "jpeg", "png"])
-import streamlit as st
+# Set theme and style
+st.markdown("""
+    <style>
+        .main {
+            text-align: center;
+        }
+        .css-18e3th9 {
+            background-color: #F5F5F5;
+        }
+        .css-1v0mbdj {
+            background-color: #DCBA00;
+            color: #31333F;
+            font-size: 1.2em;
+        }
+        .css-1v0mbdj:hover {
+            background-color: #B59B00;
+        }
+        .css-1nqz20f {
+            margin: 1.5rem 0;
+        }
+        .css-1j3w5l8 {
+            color: #FF4742;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        .stButton {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
+# Centered layout
+st.markdown('<div class="main">', unsafe_allow_html=True)
 
+st.title("Plant Disease Classification")
+st.markdown('<div class="title">Upload an image of a <b>supported</b> plant leaf to classify its disease.<br><hr></div>', unsafe_allow_html=True)
+st.warning("Supported formats .jpg, .jpeg and .png")
+
+uploaded_image = st.file_uploader("", type=["jpg", "jpeg", "png"], label_visibility="visible")
 
 if uploaded_image is not None:
     image = Image.open(uploaded_image)
-    
+    resized_img = image.resize((300, 300))  # Adjust size for better visibility
 
-   
-    resized_img = image.resize((150, 150))
-    st.image(resized_img)
-st.markdown("<br><br>", unsafe_allow_html=True)
-    
-if st.button('Find Disease'):
-    # Preprocess the uploaded image and predict the class
-    prediction = predict_image_class(model, uploaded_image, class_indices)
-    st.success(f'Predicted Disease: {str(prediction)}')
+    # Create a single column layout for centering the image
+    col1, col2, col3 = st.columns([2, 4, 1])  # Create columns with proportions
 
-st.markdown("<br><br>", unsafe_allow_html=True)
+    with col2:  # Center column
+        st.image(resized_img, caption='Uploaded Image', use_column_width=False, width=300)
+    
+    if st.button('Find Disease'):
+        # Preprocess the uploaded image and predict the class
+        prediction = predict_image_class(model, uploaded_image, class_indices)
+        import time
+        col1, col2, col3 = st.columns([2, 4, 1])  # Adjust column widths as needed
+
+        with col2:  # Center column
+            with st.spinner('Finding Disease...'):
+                time.sleep(2)  # Simulate a task
+        st.success(f"### {prediction}")
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+
+
+
+st.sidebar.title("Plant Disease Information")
+
+# Plant data with improved descriptions for diseases
+plants_data = {
+    "Select Plant": [
+        ""
+    ],
+
+    "Apple": [
+        "Apple Scab", 
+        "Black Rot", 
+        "Cedar Apple Rust", 
+        "Healthy"
+    ],
+    "Blueberry": [
+        "Healthy"
+    ],
+    "Cherry": [
+        "Powdery Mildew", 
+        "Healthy"
+    ],
+    "Corn": [
+        "Cercospora Leaf Spot", 
+        "Common Rust", 
+        "Northern Leaf Blight", 
+        "Healthy"
+    ],
+    "Grape": [
+        "Black Rot", 
+        "Esca (Black Measles)", 
+        "Leaf Blight (Isariopsis Leaf Spot)", 
+        "Healthy"
+    ],
+    "Orange": [
+        "Huanglongbing (Citrus Greening)"
+    ],
+    "Peach": [
+        "Bacterial Spot", 
+        "Healthy"
+    ],
+    "Pepper": [
+        "Bacterial Spot", 
+        "Healthy"
+    ],
+    "Potato": [
+        "Early Blight", 
+        "Late Blight", 
+        "Healthy"
+    ],
+    "Raspberry": [
+        "Healthy"
+    ],
+    "Soyabean": [
+        "Healthy"
+    ],
+    "Squash": [
+        "Powdery Mildew"
+    ],
+    "Strawberry": [
+        "Leaf Scorch", 
+        "Healthy"
+    ],
+    "Tomato": [
+        "Bacterial Spot", 
+        "Early Blight", 
+        "Late Blight", 
+        "Leaf Mold", 
+        "Septoria Leaf Spot", 
+        "Spider Mites", 
+        "Target Spot", 
+        "Yellow Leaf Curl Virus", 
+        "Mosaic Virus", 
+        "Healthy"
+    ]
+}
+
+# Sidebar elements
+st.sidebar.info("Available diseases for detection")
+
+# Dropdown to select plant type
+plant_name = st.sidebar.selectbox("Select a plant type:", list(plants_data.keys()))
+
+# Display the diseases for the selected plant type
+if plant_name != "Select Plant":
+    st.sidebar.subheader(f"Diseases for {plant_name}:")
+    diseases = plants_data[plant_name]
+    
+    # Convert the diseases list to a DataFrame for table display
+    diseases_df = pd.DataFrame(diseases, columns=["Disease Description"])
+    
+    # Display the diseases in a table format
+    st.sidebar.table(diseases_df)
+else:
+    st.sidebar.write("Please select a plant type to see the available diseases.")
