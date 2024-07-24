@@ -122,7 +122,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 
 
-st.sidebar.title("Plant Disease Information")
+st.sidebar.title("Available Plants:")
 
 # Plant data with improved descriptions for diseases
 plants_data = {
