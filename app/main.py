@@ -31,7 +31,7 @@ st.markdown("""
 
 # Load the pre-trained model and class names
 working_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = f"{working_dir}/trained_model/plant_disease_prediction_model.h5"
+model_path = "https://www.dropbox.com/scl/fi/o028ea99oh7zgkmm33hs5/plant_disease_prediction_model.h5?rlkey=r2gf56j37gf7eo0ywagodg7i2&st=uxkau5kn&dl=1"
 model = tf.keras.models.load_model(model_path)
 class_indices = json.load(open(f"{working_dir}/modified_class_indices.json"))
 
