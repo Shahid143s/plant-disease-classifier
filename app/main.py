@@ -31,15 +31,7 @@ st.markdown("""
 
 # Load the pre-trained model and class names
 working_dir = os.path.dirname(os.path.abspath(__file__))
-#Dropbox model URL
-model_url = "https://www.dropbox.com/scl/fi/o028ea99oh7zgkmm33hs5/plant_disease_prediction_model.h5?rlkey=r2gf56j37gf7eo0ywagodg7i2&st=uxkau5kn&dl=1"
-
-# Download the model file
-model_path = os.path.join(working_dir, "plant_disease_prediction_model.h5")
-response = requests.get(model_url)
-with open(model_path, "wb") as f:
-    f.write(response.content)
-
+model_path = f"{working_dir}/trained_model/plant_disease_prediction_model.h5"
 model = tf.keras.models.load_model(model_path)
 class_indices = json.load(open(f"{working_dir}/modified_class_indices.json"))
 
